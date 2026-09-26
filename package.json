@@ -1,0 +1,47 @@
+{
+  "name": "music-app",
+  "version": "1.0.0",
+  "description": "Tray-based desktop music player",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electronmon .",
+    "build": "electron-builder --win nsis",
+    "pack": "electron-builder --dir"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^44.3.0",
+    "electron-builder": "^26.0.12",
+    "electronmon": "^2.0.4"
+  },
+  "dependencies": {
+    "electron-store": "^11.0.2",
+    "express": "^5.2.1",
+    "music-metadata": "^11.15.0"
+  },
+  "build": {
+    "appId": "com.musicapp.trayplayer",
+    "productName": "Music Tray Player",
+    "files": [
+      "**/*",
+      "!dist{,/**}",
+      "!build{,/**}"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "icon": "assets/tray-icon.svg",
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

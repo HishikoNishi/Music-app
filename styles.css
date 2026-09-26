@@ -1,0 +1,906 @@
+/* --- Biến màu --- */
+:root {
+  color-scheme: dark;
+  --bg: #111217;
+  --surface: #15171f;
+  --side: #1b1e28;
+  --line: #242832;
+  --muted: #9aa4bf;
+  --text: #f6f7fb;
+  --accent: #f5a524;
+  --purple: #b467ef;
+  font-family: "Segoe UI", Inter, system-ui, sans-serif;
+}
+
+/* --- Cơ bản --- */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  overflow: hidden;
+}
+button, input { font: inherit; }
+button {
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #f3b847;
+  outline-offset: 2px;
+}
+
+/* --- Khung ứng dụng --- */
+.app {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr 88px;
+  min-height: 510px;
+}
+.workspace {
+  display: grid;
+  grid-template-columns: 168px 1fr;
+  min-height: 0;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  background: var(--side);
+  border-right: 1px solid #20232c;
+  padding: 18px 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px 16px;
+  border-bottom: 1px solid #252932;
+  margin-bottom: 8px;
+}
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7c3aed, #b467ef);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+.brand-name {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+.sidebar-label {
+  margin: 0;
+  padding: 8px 20px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7590;
+}
+.nav {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 16px;
+  margin: 0 8px;
+  width: calc(100% - 16px);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #a8b2cd;
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+}
+.nav:hover {
+  background: #242733;
+  color: #fff;
+}
+.nav.active {
+  color: var(--accent);
+  font-weight: 700;
+  background: #2a2418;
+}
+.nav-icon {
+  font-size: 16px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* --- Vùng nội dung --- */
+.content {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.content-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px 14px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.content-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+.content-caption {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+.primary {
+  padding: 9px 14px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #181208;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.primary:hover { background: #ffc251; }
+
+#view {
+  overflow-y: auto;
+  min-height: 0;
+  padding: 16px 24px 24px;
+}
+
+/* --- Toolbar & bộ lọc --- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+}
+.toolbar-note {
+  color: var(--muted);
+  font-size: 12px;
+}
+.filter-input {
+  width: min(320px, 100%);
+  padding: 9px 12px;
+  color: var(--text);
+  background: #1c1f28;
+  border: 1px solid #303542;
+  border-radius: 8px;
+}
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+}
+.chip {
+  padding: 6px 14px;
+  border-radius: 18px;
+  color: #decff2;
+  border: 1px solid #8951c7;
+  background: transparent;
+  font-size: 13px;
+}
+.chip.active {
+  background: #a75ddd;
+  border-color: #a75ddd;
+  color: #17121c;
+  font-weight: 800;
+}
+.chip[data-tone="teal"].active { background: #57c6bd; border-color: #57c6bd; }
+.chip[data-tone="orange"].active { background: #ef772e; border-color: #ef772e; }
+.chip[data-tone="blue"].active { background: #5daede; border-color: #5daede; }
+
+/* --- Danh sách bài hát --- */
+.track-list-header {
+  display: grid;
+  grid-template-columns: 28px 32px minmax(0, 1fr) 56px 32px;
+  gap: 10px;
+  align-items: center;
+  padding: 0 4px 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+  color: #6b7590;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.track-list-header .col-duration { text-align: right; }
+.track-list,
+.artist-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.track {
+  display: grid;
+  grid-template-columns: 28px 32px minmax(0, 1fr) 56px 32px;
+  gap: 10px;
+  align-items: center;
+  min-height: 48px;
+  padding: 4px;
+  border-bottom: 1px solid #1e212a;
+  border-radius: 6px;
+  cursor: grab;
+}
+.track:hover { background: #181b24; }
+.track.active {
+  background: #211d2e;
+  border-left: 3px solid var(--purple);
+  padding-left: 1px;
+}
+.track-num {
+  color: #6b7590;
+  font-size: 12px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.track.active .track-num { color: var(--accent); font-weight: 700; }
+.track-artist .track-num { visibility: hidden; }
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: #283044;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+}
+.track-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.track-subtitle {
+  color: #9aa4bf;
+  font-size: 11px;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.track-duration {
+  color: #a6b2d1;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  text-align: right;
+}
+.remove {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: #aeb8d0;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  opacity: 0.6;
+}
+.remove:hover {
+  opacity: 1;
+  color: #fff;
+  background: #63343b;
+}
+.track.dragging { opacity: 0.35; }
+.track.drop-target { outline: 1px solid #ca8cfa; }
+
+/* --- Playlist Grid & Detail --- */
+.playlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+  padding: 10px 0;
+}
+.playlist-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.playlist-card:hover {
+  transform: translateY(-4px);
+  background: #1c1f2b;
+}
+.playlist-card-cover {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #283044;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+}
+.playlist-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.playlist-card-name {
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.playlist-card-count {
+  font-size: 12px;
+  color: var(--muted);
+}
+.playlist-detail-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.playlist-cover-wrap {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  cursor: pointer;
+}
+.playlist-detail-cover {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  background: #283044;
+}
+.playlist-cover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.playlist-cover-wrap:hover .playlist-cover-overlay {
+  opacity: 1;
+}
+.playlist-detail-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.playlist-detail-name {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0;
+}
+.playlist-detail-count {
+  color: var(--muted);
+  font-size: 16px;
+}
+.playlist-detail-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+.playlist-play-all {
+  padding: 9px 18px;
+  border-radius: 20px;
+  background: var(--accent);
+  color: #181208;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.playlist-play-all:hover:not(:disabled) {
+  background: #ffc251;
+}
+.playlist-play-all:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.playlist-play-shuffle {
+  padding: 9px 18px;
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  font-weight: 800;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.playlist-play-shuffle:hover:not(:disabled) {
+  background: #242832;
+}
+.playlist-play-shuffle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-back {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  margin-bottom: 20px;
+}
+.btn-back:hover { background: #242832; }
+
+
+/* --- Danh sách ca sĩ --- */
+.artist-list { max-width: 760px; }
+.artist {
+  border-bottom: 1px solid #1e212a;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.artist.drop-ready {
+  outline: 1px dashed #f5b33b;
+  background: #292419;
+}
+.artist-head {
+  width: 100%;
+  padding: 12px 10px;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 48px 20px;
+  gap: 10px;
+  align-items: center;
+  background: transparent;
+  text-align: left;
+  border-radius: 8px;
+}
+.artist-head:hover { background: #1b1e27; }
+.artist-name { font-weight: 800; }
+.artist-count {
+  text-align: right;
+  color: #a7b2cf;
+  font-size: 12px;
+}
+.chevron {
+  color: #adb6cc;
+  font-size: 16px;
+  text-align: center;
+}
+.artist-tracks { padding: 0 10px 8px 42px; }
+.artist-tracks .track {
+  grid-template-columns: 28px 32px minmax(0, 1fr) 56px;
+}
+.drop-note {
+  color: #a9b4cd;
+  background: #171a22;
+  border: 1px dashed #394152;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 0 0 6px;
+  font-size: 12px;
+  list-style: none;
+}
+.artist-help {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.playlist-popover {
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px #0004;
+  z-index: 100;
+  min-width: 200px;
+  padding: 8px 0;
+}
+.playlist-popover-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+}
+.playlist-popover-item:hover {
+  background: #242832;
+}
+.playlist-popover-footer {
+  border-top: 1px solid var(--line);
+  padding: 8px 12px;
+}
+.playlist-popover-footer button {
+  width: 100%;
+  text-align: left;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--accent);
+  background: transparent;
+  font-weight: 600;
+}
+.playlist-popover-footer button:hover {
+  text-decoration: underline;
+}
+.playlist-checkbox {
+  accent-color: var(--accent);
+}
+
+/* --- Trạng thái trống --- */
+.empty {
+  min-height: 200px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed #303646;
+  border-radius: 10px;
+  padding: 28px;
+}
+.empty strong {
+  display: block;
+  color: #e6e9f3;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.hidden { display: none !important; }
+
+/* --- Thanh phát nhạc --- */
+.player {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(260px, 2.5fr) minmax(100px, 0.7fr);
+  align-items: center;
+  gap: 20px;
+  padding: 12px 20px;
+  background: #171920;
+  border-top: 1px solid var(--line);
+}
+.player-now {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.player-meta { min-width: 0; }
+.playing-title {
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+.player-subtitle {
+  color: #9ca7c1;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.player-center {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.player-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #d8deef;
+  font-size: 13px;
+}
+.player-control:hover {
+  background: #252932;
+  color: #fff;
+}
+.play {
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  color: #19130a;
+  font-weight: 900;
+  font-size: 14px;
+}
+.play:hover { background: #ffc251; }
+.progress {
+  width: 100%;
+  display: grid;
+  gap: 0;
+}
+.progress-line {
+  display: grid;
+  grid-template-columns: 38px 1fr 38px;
+  align-items: center;
+  gap: 8px;
+  color: #9ca7c1;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.progress input,
+.volume input {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.player-extra {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.volume {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #aeb8ce;
+  font-size: 14px;
+}
+.volume input { width: 80px; }
+
+/* --- Hộp thoại --- */
+dialog {
+  width: min(410px, calc(100% - 30px));
+  border: 1px solid #3a4050;
+  border-radius: 12px;
+  background: #20232d;
+  color: var(--text);
+  padding: 0;
+  box-shadow: 0 25px 80px #000a;
+}
+dialog::backdrop { background: #07080ca8; }
+.dialog-body { padding: 22px; }
+.dialog-body h3 { margin: 0 0 6px; }
+.dialog-body p {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0 0 18px;
+}
+.dialog-body input {
+  width: 100%;
+  color: #fff;
+  border: 1px solid #41485a;
+  border-radius: 8px;
+  background: #151820;
+  padding: 10px 12px;
+}
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 18px;
+}
+.secondary {
+  padding: 9px 13px;
+  border-radius: 8px;
+  background: #343946;
+  color: #e9edf9;
+}
+
+/* --- Thông báo trạng thái --- */
+#status {
+  position: fixed;
+  left: 50%;
+  bottom: 100px;
+  transform: translateX(-50%);
+  z-index: 3;
+  color: #e9edf9;
+  font-size: 12px;
+  background: #252932ee;
+  border: 1px solid #3a4050;
+  border-radius: 8px;
+  padding: 8px 14px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#status:not(:empty) { opacity: 1; }
+
+/* --- YouTube Music --- */
+.yt-player-section {
+  flex-shrink: 0;
+  padding: 0 24px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.yt-player-section.yt-audio-only {
+  position: fixed;
+  width: 2px;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0.01;
+  pointer-events: none;
+  padding: 0;
+  border: 0;
+}
+.yt-player-section #youtube-player {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+}
+.yt-search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.yt-search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  color: var(--text);
+  background: #1c1f28;
+  border: 1px solid #303542;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.yt-search-btn { flex-shrink: 0; }
+.yt-status {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.yt-status.loading { color: var(--accent); }
+.yt-results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.yt-result {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 36px;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.yt-result:hover {
+  background: #181b24;
+  border-color: #2a2f3d;
+}
+.yt-result.active {
+  background: #211d2e;
+  border-color: #8951c7;
+}
+.yt-thumb {
+  width: 120px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #283044;
+}
+.yt-result-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.yt-result-title {
+  font-weight: 700;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.yt-result-channel {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.yt-play-icon {
+  color: var(--accent);
+  font-size: 14px;
+  opacity: 0.7;
+}
+.yt-result:hover .yt-play-icon,
+.yt-result.active .yt-play-icon { opacity: 1; }
+.yt-error,
+.yt-setup {
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px dashed #394152;
+  background: #171a22;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.yt-setup strong,
+.yt-error { color: #e6e9f3; display: block; margin-bottom: 8px; font-size: 15px; }
+.yt-setup code {
+  background: #252932;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.yt-setup ol { margin: 10px 0 0; padding-left: 20px; }
+.yt-setup a { color: var(--accent); }
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+  .workspace { grid-template-columns: 52px 1fr; }
+  .sidebar-brand,
+  .sidebar-label,
+  .brand-name,
+  .nav-label { display: none; }
+  .sidebar { padding-top: 10px; }
+  .nav {
+    padding: 0;
+    justify-content: center;
+    margin: 0 4px;
+    width: calc(100% - 8px);
+  }
+  .content-head { padding: 14px 16px; }
+  #view { padding: 12px 16px 20px; }
+  .player {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .player-center { grid-column: 1 / -1; order: 3; }
+  .player-extra { display: none; }
+  .track-list-header { display: none; }
+  .track {
+    grid-template-columns: 24px 28px minmax(0, 1fr) 48px 28px;
+    gap: 6px;
+  }
+  .artist-tracks { padding-left: 12px; }
+  .yt-player-section { padding: 0 16px 10px; }
+  .yt-result {
+    grid-template-columns: 88px minmax(0, 1fr) 28px;
+    gap: 10px;
+  }
+  .yt-thumb { width: 88px; height: 50px; }
+  .yt-search-bar { flex-direction: column; }
+}
