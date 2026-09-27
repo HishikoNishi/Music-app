@@ -68,10 +68,8 @@ input:focus-visible {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #7c3aed, #b467ef);
-  display: grid;
-  place-items: center;
-  font-size: 16px;
+  object-fit: cover;
+  display: block;
 }
 .brand-name {
   font-weight: 800;

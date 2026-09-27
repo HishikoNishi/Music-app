@@ -33,7 +33,7 @@
     "directories": {
       "buildResources": "assets"
     },
-    "icon": "assets/tray-icon.svg",
+    "icon": "assets/icon.png",
     "win": {
       "target": [
         "nsis"

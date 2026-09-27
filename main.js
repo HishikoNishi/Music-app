@@ -34,14 +34,8 @@ async function startLocalServer() {
   });
 }
 
-function createTrayImage() {
-
-  const svg = encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-      <rect width="64" height="64" rx="16" fill="#7c3aed"/>
-      <path fill="#fff" d="M43 12v29.3A10 10 0 1 1 37 32V20l-18 5v20.3A10 10 0 1 1 13 36V20l30-8Z"/>
-    </svg>`);
-  return nativeImage.createFromDataURL(`data:image/svg+xml;charset=utf-8,${svg}`);
+function getAppIconPath() {
+  return path.join(__dirname, 'assets', 'icon.png');
 }
 
 function sendCommand(command) {
@@ -79,14 +73,14 @@ function toggleWindow() {
 }
 
 function createWindow() {
-  const appIcon = createTrayImage();
+  const appIcon = nativeImage.createFromPath(getAppIconPath());
   mainWindow = new BrowserWindow({
     width: 980,
     height: 720,
     minWidth: 760,
     minHeight: 560,
     show: false,
-    title: 'Music Tray Player',
+    title: 'Rove in Heaven',
     icon: appIcon,
     backgroundColor: '#10101b',
     webPreferences: {
@@ -111,7 +105,7 @@ function createWindow() {
 }
 
 function createTray() {
-  tray = new Tray(createTrayImage());
+  tray = new Tray(nativeImage.createFromPath(getAppIconPath()).resize({ width: 16, height: 16 }));
   tray.setToolTip('Music Tray Player');
   tray.on('click', toggleWindow);
   updateTrayMenu();
@@ -319,6 +313,7 @@ app.whenReady().then(async () => {
     }
   });
   await startLocalServer();
+  Menu.setApplicationMenu(null);
   registerIpc();
   createWindow();
   createTray();
