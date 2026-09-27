@@ -316,13 +316,11 @@ input:focus-visible {
   border-radius: 12px;
   padding: 12px;
   cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 .playlist-card:hover {
-  transform: translateY(-4px);
   background: #1c1f2b;
 }
 .playlist-card-cover {
@@ -735,6 +733,104 @@ dialog::backdrop { background: #07080ca8; }
 }
 #status:not(:empty) { opacity: 1; }
 
+/* --- Animation & UI Polish --- */
+.removing {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+#view {
+  overflow-y: auto;
+  min-height: 0;
+  padding: 16px 24px 24px;
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+#view.view-transition {
+  opacity: 0;
+  transform: translateX(16px);
+}
+
+.icon-delete-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--muted);
+  transition: all 150ms ease;
+  padding: 0;
+}
+.icon-delete-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+.icon-delete-btn:hover {
+  background: rgba(211, 47, 47, 0.1);
+  color: #ff5252;
+}
+
+.btn-delete-danger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: transparent;
+  color: #ff5252;
+  border: 1px solid #ff5252;
+  font-weight: 700;
+  transition: all 150ms ease;
+}
+.btn-delete-danger svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.btn-delete-danger:hover {
+  background: #ff5252;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(255, 82, 82, 0.3);
+}
+
+.playlist-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.playlist-card:hover {
+  transform: scale(1.03) translateY(-4px);
+  background: #1c1f2b;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  border-color: rgba(245, 165, 36, 0.3);
+}
+
+.track {
+  display: grid;
+  grid-template-columns: 28px 32px minmax(0, 1fr) 56px 32px;
+  gap: 10px;
+  align-items: center;
+  min-height: 48px;
+  padding: 4px;
+  border-bottom: 1px solid #1e212a;
+  border-radius: 6px;
+  cursor: grab;
+  transition: background-color 150ms ease;
+}
+
+.primary:active, .secondary:active {
+  transform: scale(0.97);
+}
+
 /* --- YouTube Music --- */
 .yt-player-section {
   flex-shrink: 0;
@@ -903,4 +999,81 @@ dialog::backdrop { background: #07080ca8; }
   }
   .yt-thumb { width: 88px; height: 50px; }
   .yt-search-bar { flex-direction: column; }
+}
+
+/* --- Animation & UI Polish --- */
+.removing {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+#view {
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+#view.view-transition {
+  opacity: 0;
+  transform: translateX(16px);
+}
+
+.icon-delete-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  color: var(--muted);
+  transition: all 150ms ease;
+  padding: 0;
+}
+.icon-delete-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+.icon-delete-btn:hover {
+  background: rgba(211, 47, 47, 0.1);
+  color: #ff5252;
+}
+
+.btn-delete-danger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: transparent;
+  color: #ff5252;
+  border: 1px solid #ff5252;
+  font-weight: 700;
+  transition: all 150ms ease;
+}
+.btn-delete-danger svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.btn-delete-danger:hover {
+  background: #ff5252;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(255, 82, 82, 0.3);
+}
+
+.playlist-card {
+  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease, border-color 150ms ease !important;
+}
+.playlist-card:hover {
+  transform: scale(1.03) translateY(-4px) !important;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3) !important;
+  border-color: rgba(245, 165, 36, 0.3) !important;
+}
+
+.track {
+  transition: background-color 150ms ease !important;
+}
+
+.primary:active, .secondary:active {
+  transform: scale(0.97);
 }

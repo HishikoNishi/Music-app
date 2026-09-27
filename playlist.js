@@ -14,19 +14,32 @@
   let activePlaylistId = null;
 
   function confirmAndDeletePlaylist(playlistId, playlistName) {
-    if (!window.confirm(`Bạn có chắc muốn xóa playlist "${playlistName}"? Thao tác này không thể hoàn tác.`)) {
-      return;
-    }
+    window.showConfirmDialog(`Bạn có chắc muốn xóa playlist "${playlistName}"? Thao tác này không thể hoàn tác.`, () => {
+      const index = state.playlists.findIndex(p => p.id === playlistId);
+      if (index === -1) return;
 
-    const index = state.playlists.findIndex(p => p.id === playlistId);
-    if (index !== -1) {
-      state.playlists.splice(index, 1);
-      if (activePlaylistId === playlistId) {
-        activePlaylistId = null;
+      const view = document.querySelector('#view');
+      const card = Array.from(view.querySelectorAll('.playlist-card')).find(c => c.querySelector('.playlist-card-name')?.textContent === playlistName);
+
+      if (card) {
+        card.classList.add('removing');
+        setTimeout(() => {
+          state.playlists.splice(index, 1);
+          if (activePlaylistId === playlistId) {
+            activePlaylistId = null;
+          }
+          hooks.saveSoon();
+          hooks.renderContent();
+        }, 200);
+      } else {
+        state.playlists.splice(index, 1);
+        if (activePlaylistId === playlistId) {
+          activePlaylistId = null;
+        }
+        hooks.saveSoon();
+        hooks.renderContent();
       }
-      hooks.saveSoon();
-      hooks.renderContent();
-    }
+    });
   }
 
   function makeId() {
@@ -66,68 +79,74 @@
       return;
     }
 
-    view.replaceChildren();
-    const toolbar = document.createElement('div');
-    toolbar.className = 'toolbar';
-    const create = document.createElement('button');
-    create.className = 'primary';
-    create.textContent = '＋ Tạo playlist';
-    create.addEventListener('click', openPlaylistDialog);
-    toolbar.append(create);
-    view.append(toolbar);
+    view.classList.add('view-transition');
 
-    if (!state.playlists || !state.playlists.length) {
-      const empty = document.createElement('div');
-      empty.className = 'empty';
-      empty.innerHTML = '<div><strong>Chưa có playlist</strong>Tạo playlist mới và thêm bài hát vào.</div>';
-      view.append(empty);
-      return;
-    }
+    setTimeout(() => {
+      view.replaceChildren();
+      const toolbar = document.createElement('div');
+      toolbar.className = 'toolbar';
+      const create = document.createElement('button');
+      create.className = 'primary';
+      create.textContent = '＋ Tạo playlist';
+      create.addEventListener('click', openPlaylistDialog);
+      toolbar.append(create);
+      view.append(toolbar);
 
-    const grid = document.createElement('div');
-    grid.className = 'playlist-grid';
-    state.playlists.forEach(pl => {
-      const card = document.createElement('div');
-      card.className = 'playlist-card';
-
-      const cover = document.createElement('div');
-      cover.className = 'playlist-card-cover';
-      if (pl.cover) {
-        cover.style.backgroundImage = `url("${pl.cover}")`;
-        cover.style.backgroundSize = 'cover';
-        cover.style.backgroundPosition = 'center';
-      } else {
-        cover.textContent = '📂';
-        cover.style.backgroundColor = `hsl(${pl.id.charCodeAt(0) * 137.5 % 360}, 60%, 40%)`;
+      if (!state.playlists || !state.playlists.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.innerHTML = '<div><strong>Chưa có playlist</strong>Tạo playlist mới và thêm bài hát vào.</div>';
+        view.append(empty);
+        view.classList.remove('view-transition');
+        return;
       }
 
-      const info = document.createElement('div');
-      info.className = 'playlist-card-info';
-      const name = document.createElement('div');
-      name.className = 'playlist-card-name';
-      name.textContent = pl.name;
-      const count = document.createElement('div');
-      count.className = 'playlist-card-count';
-      count.textContent = `${pl.items.length} bài`;
-      info.append(name, count);
+      const grid = document.createElement('div');
+      grid.className = 'playlist-grid';
+      state.playlists.forEach(pl => {
+        const card = document.createElement('div');
+        card.className = 'playlist-card';
 
-      const delBtn = document.createElement('button');
-      delBtn.className = 'playlist-card-delete';
-      delBtn.textContent = '×';
-      delBtn.title = 'Xóa playlist';
-      delBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        confirmAndDeletePlaylist(pl.id, pl.name);
-      });
+        const cover = document.createElement('div');
+        cover.className = 'playlist-card-cover';
+        if (pl.cover) {
+          cover.style.backgroundImage = `url("${pl.cover}")`;
+          cover.style.backgroundSize = 'cover';
+          cover.style.backgroundPosition = 'center';
+        } else {
+          cover.textContent = '📂';
+          cover.style.backgroundColor = `hsl(${pl.id.charCodeAt(0) * 137.5 % 360}, 60%, 40%)`;
+        }
 
-      card.append(cover, info, delBtn);
-      card.addEventListener('click', () => {
-        activePlaylistId = pl.id;
-        hooks.renderContent();
+        const info = document.createElement('div');
+        info.className = 'playlist-card-info';
+        const name = document.createElement('div');
+        name.className = 'playlist-card-name';
+        name.textContent = pl.name;
+        const count = document.createElement('div');
+        count.className = 'playlist-card-count';
+        count.textContent = `${pl.items.length} bài`;
+        info.append(name, count);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'playlist-card-delete icon-delete-btn';
+        delBtn.innerHTML = window.trashIcon || '×';
+        delBtn.title = 'Xóa playlist';
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          confirmAndDeletePlaylist(pl.id, pl.name);
+        });
+
+        card.append(cover, info, delBtn);
+        card.addEventListener('click', () => {
+          activePlaylistId = pl.id;
+          hooks.renderContent();
+        });
+        grid.append(card);
       });
-      grid.append(card);
-    });
-    view.append(grid);
+      view.append(grid);
+      view.classList.remove('view-transition');
+    }, 50);
   }
 
   function renderPlaylistDetail(view) {
@@ -138,168 +157,176 @@
       return;
     }
 
-    view.replaceChildren();
+    view.classList.add('view-transition');
 
-    const backBtn = document.createElement('button');
-    backBtn.className = 'btn-back';
-    backBtn.textContent = '← Quay lại';
-    backBtn.addEventListener('click', () => {
-      activePlaylistId = null;
-      hooks.renderContent();
-    });
-    view.append(backBtn);
+    setTimeout(() => {
+      view.replaceChildren();
 
-    const head = document.createElement('div');
-    head.className = 'playlist-detail-head';
-
-    const coverWrap = document.createElement('div');
-    coverWrap.className = 'playlist-cover-wrap';
-
-    const cover = document.createElement('div');
-    cover.className = 'playlist-detail-cover';
-    if (pl.cover) {
-      cover.style.backgroundImage = `url("${pl.cover}")`;
-      cover.style.backgroundSize = 'cover';
-      cover.style.backgroundPosition = 'center';
-    } else {
-      cover.textContent = '📂';
-      cover.style.backgroundColor = `hsl(${pl.id.charCodeAt(0) * 137.5 % 360}, 60%, 40%)`;
-      cover.style.display = 'grid';
-      cover.style.placeItems = 'center';
-      cover.style.fontSize = '48px';
-    }
-
-    const overlay = document.createElement('div');
-    overlay.className = 'playlist-cover-overlay';
-    overlay.innerHTML = '<span>📷 Đổi ảnh</span>';
-
-    coverWrap.append(cover, overlay);
-    coverWrap.addEventListener('click', async () => {
-      const newCover = await window.musicApi.chooseCover();
-      if (newCover) {
-        pl.cover = newCover;
-        hooks.saveSoon();
+      const backBtn = document.createElement('button');
+      backBtn.className = 'btn-back';
+      backBtn.textContent = '← Quay lại';
+      backBtn.addEventListener('click', () => {
+        activePlaylistId = null;
         hooks.renderContent();
-      }
-    });
-
-    const info = document.createElement('div');
-    info.className = 'playlist-detail-info';
-    const name = document.createElement('h2');
-    name.className = 'playlist-detail-name';
-    name.textContent = pl.name;
-    const count = document.createElement('div');
-    count.className = 'playlist-detail-count';
-    count.textContent = `${pl.items.length} bài hát`;
-
-    const detailActions = document.createElement('div');
-    detailActions.className = 'playlist-detail-actions-top';
-    const delPlaylistBtn = document.createElement('button');
-    delPlaylistBtn.className = 'btn-delete-playlist';
-    delPlaylistBtn.textContent = '🗑 Xóa playlist';
-    delPlaylistBtn.addEventListener('click', () => {
-      confirmAndDeletePlaylist(pl.id, pl.name);
-    });
-    detailActions.append(delPlaylistBtn);
-
-    const actions = document.createElement('div');
-    actions.className = 'playlist-detail-actions';
-
-    const playAllBtn = document.createElement('button');
-    playAllBtn.className = 'playlist-play-all';
-    playAllBtn.textContent = '▶ Phát tất cả';
-    if (pl.items.length > 0) {
-      playAllBtn.addEventListener('click', () => {
-        hooks.loadPlaylistTrack(pl.id, 0, { play: true });
       });
-    } else {
-      playAllBtn.disabled = true;
-      playAllBtn.style.opacity = '0.5';
-      playAllBtn.style.cursor = 'not-allowed';
-    }
+      view.append(backBtn);
 
-    const shuffleBtn = document.createElement('button');
-    shuffleBtn.className = 'playlist-play-shuffle';
-    shuffleBtn.textContent = '⤮ Phát ngẫu nhiên';
-    if (pl.items.length > 0) {
-      shuffleBtn.addEventListener('click', () => {
-        const randomIndex = Math.floor(Math.random() * pl.items.length);
-        hooks.loadPlaylistTrack(pl.id, randomIndex, { play: true });
-      });
-    } else {
-      shuffleBtn.disabled = true;
-      shuffleBtn.style.opacity = '0.5';
-      shuffleBtn.style.cursor = 'not-allowed';
-    }
-    actions.append(playAllBtn, shuffleBtn);
+      const head = document.createElement('div');
+      head.className = 'playlist-detail-head';
 
-    info.append(name, count, detailActions, actions);
-    head.append(coverWrap, info);
-    view.append(head);
+      const coverWrap = document.createElement('div');
+      coverWrap.className = 'playlist-cover-wrap';
 
-    const list = document.createElement('ul');
-    list.className = 'track-list';
-    pl.items.forEach((item, index) => {
-      const row = document.createElement('li');
-      row.className = 'track';
-
-      // Highlight if this track is currently active
-      const isCurrent = (item.type === 'local' && item.trackId === state.currentTrackId) ||
-                        (item.type === 'youtube' && state.playbackMode === 'youtube' &&
-                         window.YouTubeModule.isActive() &&
-                         window.YouTubeModule.currentItem()?.videoId === item.videoId);
-      if (isCurrent) row.classList.add('active');
-
-      row.style.display = 'grid';
-      row.style.gridTemplateColumns = '28px 32px minmax(0, 1fr) 56px 32px';
-      row.style.gap = '10px';
-      row.style.alignItems = 'center';
-      row.style.padding = '4px';
-      row.style.borderBottom = '1px solid #1e212a';
-      row.style.cursor = 'pointer';
-
-
-      const num = document.createElement('span'); num.className = 'track-num'; num.textContent = index + 1;
-      const av = document.createElement('span'); av.className = 'avatar';
-      if (item.type === 'youtube' && item.thumbnail) {
-        const img = document.createElement('img');
-        img.src = item.thumbnail;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.borderRadius = '50%';
-        img.style.objectFit = 'cover';
-        av.append(img);
+      const cover = document.createElement('div');
+      cover.className = 'playlist-detail-cover';
+      if (pl.cover) {
+        cover.style.backgroundImage = `url("${pl.cover}")`;
+        cover.style.backgroundSize = 'cover';
+        cover.style.backgroundPosition = 'center';
       } else {
-        av.textContent = item.type === 'local' ? '♪' : 'YT';
+        cover.textContent = '📂';
+        cover.style.backgroundColor = `hsl(${pl.id.charCodeAt(0) * 137.5 % 360}, 60%, 40%)`;
+        cover.style.display = 'grid';
+        cover.style.placeItems = 'center';
+        cover.style.fontSize = '48px';
       }
-      const det = document.createElement('div');
-      const t = document.createElement('div'); t.className = 'track-name'; t.textContent = item.title;
-      const s = document.createElement('div'); s.className = 'track-subtitle'; s.textContent = item.channel || 'Local';
-      det.append(t, s);
-      const dur = document.createElement('span'); dur.className = 'track-duration'; dur.textContent = item.duration || '--:--';
 
-      row.addEventListener('click', () => {
-        try {
-          hooks.loadPlaylistTrack(pl.id, index, { play: true, reset: true });
-        } catch (error) {
-          console.error('[Playlist] Error calling loadPlaylistTrack:', error);
+      const overlay = document.createElement('div');
+      overlay.className = 'playlist-cover-overlay';
+      overlay.innerHTML = '<span>📷 Đổi ảnh</span>';
+
+      coverWrap.append(cover, overlay);
+      coverWrap.addEventListener('click', async () => {
+        const newCover = await window.musicApi.chooseCover();
+        if (newCover) {
+          pl.cover = newCover;
+          hooks.saveSoon();
+          hooks.renderContent();
         }
       });
-      row.append(num, av, det, dur);
 
-      const rem = document.createElement('button');
-      rem.className = 'remove';
-      rem.textContent = '×';
-      rem.addEventListener('click', (e) => {
-        e.stopPropagation();
-        pl.items.splice(index, 1);
-        hooks.renderContent();
-        hooks.saveSoon();
+      const info = document.createElement('div');
+      info.className = 'playlist-detail-info';
+      const name = document.createElement('h2');
+      name.className = 'playlist-detail-name';
+      name.textContent = pl.name;
+      const count = document.createElement('div');
+      count.className = 'playlist-detail-count';
+      count.textContent = `${pl.items.length} bài hát`;
+
+      const detailActions = document.createElement('div');
+      detailActions.className = 'playlist-detail-actions-top';
+      const delPlaylistBtn = document.createElement('button');
+      delPlaylistBtn.className = 'btn-delete-playlist btn-delete-danger';
+      delPlaylistBtn.innerHTML = (window.trashIcon || '🗑') + ' Xóa playlist';
+      delPlaylistBtn.addEventListener('click', () => {
+        confirmAndDeletePlaylist(pl.id, pl.name);
       });
-      row.append(rem);
-      list.append(row);
-    });
-    view.append(list);
+      detailActions.append(delPlaylistBtn);
+
+      const actions = document.createElement('div');
+      actions.className = 'playlist-detail-actions';
+
+      const playAllBtn = document.createElement('button');
+      playAllBtn.className = 'playlist-play-all';
+      playAllBtn.textContent = '▶ Phát tất cả';
+      if (pl.items.length > 0) {
+        playAllBtn.addEventListener('click', () => {
+          hooks.loadPlaylistTrack(pl.id, 0, { play: true });
+        });
+      } else {
+        playAllBtn.disabled = true;
+        playAllBtn.style.opacity = '0.5';
+        playAllBtn.style.cursor = 'not-allowed';
+      }
+
+      const shuffleBtn = document.createElement('button');
+      shuffleBtn.className = 'playlist-play-shuffle';
+      shuffleBtn.textContent = '⤮ Phát ngẫu nhiên';
+      if (pl.items.length > 0) {
+        shuffleBtn.addEventListener('click', () => {
+          const randomIndex = Math.floor(Math.random() * pl.items.length);
+          hooks.loadPlaylistTrack(pl.id, randomIndex, { play: true });
+        });
+      } else {
+        shuffleBtn.disabled = true;
+        shuffleBtn.style.opacity = '0.5';
+        shuffleBtn.style.cursor = 'not-allowed';
+      }
+      actions.append(playAllBtn, shuffleBtn);
+
+      info.append(name, count, detailActions, actions);
+      head.append(coverWrap, info);
+      view.append(head);
+
+      const list = document.createElement('ul');
+      list.className = 'track-list';
+      pl.items.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'track';
+        row.style.display = 'grid';
+        row.style.gridTemplateColumns = '28px 32px minmax(0, 1fr) 56px 32px';
+        row.style.gap = '10px';
+        row.style.alignItems = 'center';
+        row.style.padding = '4px';
+        row.style.borderBottom = '1px solid #1e212a';
+        row.style.cursor = 'pointer';
+
+        const num = document.createElement('span');
+        num.className = 'track-num';
+        num.textContent = index + 1;
+
+        const av = document.createElement('span');
+        av.className = 'avatar';
+        if (item.type === 'youtube' && item.thumbnail) {
+          const img = document.createElement('img');
+          img.src = item.thumbnail;
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.borderRadius = '50%';
+          img.style.objectFit = 'cover';
+          av.append(img);
+        } else {
+          av.textContent = item.type === 'local' ? '♪' : 'YT';
+        }
+
+        const det = document.createElement('div');
+        const t = document.createElement('div');
+        t.className = 'track-name';
+        t.textContent = item.title;
+        const s = document.createElement('div');
+        s.className = 'track-subtitle';
+        s.textContent = item.channel || 'Local';
+        det.append(t, s);
+
+        const dur = document.createElement('span');
+        dur.className = 'track-duration';
+        dur.textContent = item.duration || '--:--';
+
+        const rem = document.createElement('button');
+        rem.className = 'remove icon-delete-btn';
+        rem.innerHTML = window.trashIcon || '×';
+        rem.addEventListener('click', (e) => {
+          e.stopPropagation();
+          pl.items.splice(index, 1);
+          hooks.renderContent();
+          hooks.saveSoon();
+        });
+
+        row.addEventListener('click', () => {
+          try {
+            hooks.loadPlaylistTrack(pl.id, index, { play: true, reset: true });
+          } catch (error) {
+            console.error('[Playlist] Error calling loadPlaylistTrack:', error);
+          }
+        });
+
+        row.append(num, av, det, dur, rem);
+        list.append(row);
+      });
+      view.append(list);
+      view.classList.remove('view-transition');
+    }, 50);
   }
 
   function showPlaylistPopover(e, item) {

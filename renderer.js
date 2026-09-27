@@ -1,4 +1,4 @@
-const audio = document.querySelector('#audio');
+const trashIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
 const view = document.querySelector('#view');
 const chooseButton = document.querySelector('#choose-music');
 const contentTitle = document.querySelector('#content-title');
@@ -19,6 +19,11 @@ const artistForm = document.querySelector('#artist-form');
 const artistNameInput = document.querySelector('#artist-name');
 const artistCancelButton = document.querySelector('#artist-cancel');
 
+const confirmDialog = document.querySelector('#confirm-dialog');
+const confirmMessage = document.querySelector('#confirm-message');
+const confirmCancelBtn = document.querySelector('#confirm-cancel');
+const confirmOkBtn = document.querySelector('#confirm-ok');
+
 let state = { playlist: [], artists: [], playlists: [], currentTrackId: null, position: 0, volume: 0.8, isPlaying: false };
 let activeView = 'playlists';
 let activeChip = 'Tất cả';
@@ -31,6 +36,7 @@ let lastSavedPosition = -1;
 let playbackMode = 'local';
 /** Playlist hiện tại đang phát (nếu có). */
 let activePlaylistId = null;
+let activePlaylistIndex = -1;
 
 const makeId = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
 const currentIndex = () => state.playlist.findIndex((track) => track.id === state.currentTrackId);
@@ -51,6 +57,28 @@ function snapshot() {
     volume: Number(volumeInput.value),
     isPlaying: !audio.paused
   };
+}
+
+function showConfirmDialog(message, onConfirm) {
+  if (!confirmDialog || !confirmMessage) return;
+  confirmMessage.textContent = message;
+  confirmDialog.showModal();
+
+  const handleCancel = () => {
+    confirmDialog.close();
+    confirmCancelBtn.removeEventListener('click', handleCancel);
+    confirmOkBtn.removeEventListener('click', handleOk);
+  };
+
+  const handleOk = () => {
+    confirmDialog.close();
+    confirmCancelBtn.removeEventListener('click', handleCancel);
+    confirmOkBtn.removeEventListener('click', handleOk);
+    if (onConfirm) onConfirm();
+  };
+
+  confirmCancelBtn.addEventListener('click', handleCancel);
+  confirmOkBtn.addEventListener('click', handleOk);
 }
 
 function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(() => window.musicApi.saveState(snapshot()), 300); }
@@ -294,6 +322,7 @@ function loadTrack(index, { play = false, reset = false } = {}) {
   const track = state.playlist[index]; if (!track) return;
   switchToLocalPlayback();
   activePlaylistId = null;
+  activePlaylistIndex = -1;
   const changed = track.id !== state.currentTrackId; state.currentTrackId = track.id; pendingSeek = reset || changed ? 0 : state.position;
   if (changed || audio.src !== toFileUrl(track.path)) { audio.src = toFileUrl(track.path); audio.load(); }
   updateNowPlaying(); renderContent(); saveSoon(); if (play) audio.play().catch(() => setStatus('Không thể phát tệp này. Hãy kiểm tra định dạng hoặc đường dẫn.'));
@@ -305,10 +334,14 @@ function loadPlaylistTrack(playlistId, index, options = {}) {
   const item = playlist.items[index];
   if (!item) return;
 
+  activePlaylistId = playlistId;
+  activePlaylistIndex = index;
+
   if (item.type === 'local') {
     const trackIndex = state.playlist.findIndex((t) => t.id === item.trackId);
     if (trackIndex < 0) { setStatus('Bài hát local này không còn trong thư viện.'); return; }
     loadTrack(trackIndex, { play: options.play !== false, reset: true });
+    activePlaylistId = playlistId;
   } else if (item.type === 'youtube') {
     switchToYouTubePlayback();
     window.YouTubeModule.playVideoDirect(item.videoId, {
@@ -338,9 +371,8 @@ function nextTrack() {
   }
   if (activePlaylistId) {
     const pl = state.playlists.find(p => p.id === activePlaylistId);
-    if (!pl) return;
-    const curIdx = pl.items.findIndex(i => (i.type === 'local' && i.trackId === state.currentTrackId) || (i.type === 'youtube' && playbackMode === 'youtube'));
-    const nextIdx = (curIdx + 1) % pl.items.length;
+    if (!pl || !pl.items.length) return;
+    const nextIdx = (activePlaylistIndex + 1) % pl.items.length;
     loadPlaylistTrack(activePlaylistId, nextIdx, { play: true, reset: true });
     return;
   }
@@ -356,9 +388,8 @@ function previousTrack() {
   }
   if (activePlaylistId) {
     const pl = state.playlists.find(p => p.id === activePlaylistId);
-    if (!pl) return;
-    const curIdx = pl.items.findIndex(i => (i.type === 'local' && i.trackId === state.currentTrackId) || (i.type === 'youtube' && playbackMode === 'youtube'));
-    const prevIdx = (curIdx <= 0) ? pl.items.length - 1 : curIdx - 1;
+    if (!pl || !pl.items.length) return;
+    const prevIdx = (activePlaylistIndex - 1 + pl.items.length) % pl.items.length;
     loadPlaylistTrack(activePlaylistId, prevIdx, { play: true, reset: true });
     return;
   }
