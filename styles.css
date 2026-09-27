@@ -311,43 +311,90 @@ input:focus-visible {
   padding: 10px 0;
 }
 .playlist-card {
+  position: relative;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 12px;
+  padding: 0;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 .playlist-card:hover {
   background: #1c1f2b;
 }
 .playlist-card-cover {
+  position: relative;
   aspect-ratio: 1 / 1;
   width: 100%;
-  border-radius: 8px;
+  border-radius: 12px;
   object-fit: cover;
   background: #283044;
   display: grid;
   place-items: center;
   font-size: 24px;
+  overflow: hidden;
 }
 .playlist-card-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px 10px 12px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+.playlist-card:hover .playlist-card-info {
+  transform: translateY(0);
+  opacity: 1;
 }
 .playlist-card-name {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .playlist-card-count {
-  font-size: 12px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.75);
+}
+.playlist-card-delete {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  left: auto;
+  bottom: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   color: var(--muted);
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 150ms ease, transform 150ms ease, background 150ms ease, border-color 150ms ease, color 150ms ease;
+  z-index: 5;
+}
+.playlist-card:hover .playlist-card-delete {
+  opacity: 1;
+  transform: scale(1);
+}
+.playlist-card-delete:hover {
+  background: #d32f2f;
+  border-color: #d32f2f;
+  color: #fff;
 }
 .playlist-detail-head {
   display: flex;
@@ -797,34 +844,16 @@ dialog::backdrop { background: #07080ca8; }
 }
 
 .playlist-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px;
-  cursor: pointer;
-  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease, border-color 150ms ease !important;
 }
 .playlist-card:hover {
-  transform: scale(1.03) translateY(-4px);
-  background: #1c1f2b;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-  border-color: rgba(245, 165, 36, 0.3);
+  transform: scale(1.03) translateY(-4px) !important;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3) !important;
+  border-color: rgba(245, 165, 36, 0.3) !important;
 }
 
 .track {
-  display: grid;
-  grid-template-columns: 28px 32px minmax(0, 1fr) 56px 32px;
-  gap: 10px;
-  align-items: center;
-  min-height: 48px;
-  padding: 4px;
-  border-bottom: 1px solid #1e212a;
-  border-radius: 6px;
-  cursor: grab;
-  transition: background-color 150ms ease;
+  transition: background-color 150ms ease !important;
 }
 
 .primary:active, .secondary:active {
@@ -990,90 +1019,13 @@ dialog::backdrop { background: #07080ca8; }
   .track {
     grid-template-columns: 24px 28px minmax(0, 1fr) 48px 28px;
     gap: 6px;
-  }
+}
   .artist-tracks { padding-left: 12px; }
   .yt-player-section { padding: 0 16px 10px; }
   .yt-result {
     grid-template-columns: 88px minmax(0, 1fr) 28px;
     gap: 10px;
-  }
+}
   .yt-thumb { width: 88px; height: 50px; }
   .yt-search-bar { flex-direction: column; }
-}
-
-/* --- Animation & UI Polish --- */
-.removing {
-  opacity: 0;
-  transform: scale(0.95);
-  transition: opacity 200ms ease, transform 200ms ease;
-}
-
-#view {
-  transition: opacity 250ms ease, transform 250ms ease;
-}
-
-#view.view-transition {
-  opacity: 0;
-  transform: translateX(16px);
-}
-
-.icon-delete-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: transparent;
-  color: var(--muted);
-  transition: all 150ms ease;
-  padding: 0;
-}
-.icon-delete-btn svg {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
-}
-.icon-delete-btn:hover {
-  background: rgba(211, 47, 47, 0.1);
-  color: #ff5252;
-}
-
-.btn-delete-danger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: transparent;
-  color: #ff5252;
-  border: 1px solid #ff5252;
-  font-weight: 700;
-  transition: all 150ms ease;
-}
-.btn-delete-danger svg {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-}
-.btn-delete-danger:hover {
-  background: #ff5252;
-  color: #fff;
-  box-shadow: 0 0 12px rgba(255, 82, 82, 0.3);
-}
-
-.playlist-card {
-  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease, border-color 150ms ease !important;
-}
-.playlist-card:hover {
-  transform: scale(1.03) translateY(-4px) !important;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.3) !important;
-  border-color: rgba(245, 165, 36, 0.3) !important;
-}
-
-.track {
-  transition: background-color 150ms ease !important;
-}
-
-.primary:active, .secondary:active {
-  transform: scale(0.97);
 }

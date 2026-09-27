@@ -137,7 +137,8 @@
           confirmAndDeletePlaylist(pl.id, pl.name);
         });
 
-        card.append(cover, info, delBtn);
+        cover.append(info);
+        card.append(cover, delBtn);
         card.addEventListener('click', () => {
           activePlaylistId = pl.id;
           hooks.renderContent();
